@@ -12,18 +12,21 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.company47.ad340weather.R
+import com.company47.ad340weather.`interface`.AppNavigator
 import com.company47.ad340weather.adapter.DailyForecastAdapter
 import com.company47.ad340weather.databinding.ActivityMainBinding
+import com.company47.ad340weather.location.CurrentForecastFragment
+import com.company47.ad340weather.location.LocationEntryFragment
 import com.company47.ad340weather.model_data.DailyForecast
 import com.company47.ad340weather.repository.ForecastRepository
 import com.company47.ad340weather.utils.TempDisplaySettingManager
 import com.company47.ad340weather.utils.disAlertDialog
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),AppNavigator {
 
     private lateinit var tempDisplaySettingManager: TempDisplaySettingManager;
     private lateinit var binding: ActivityMainBinding
-    private val forecastRepository = ForecastRepository()
+  //  private val forecastRepository = ForecastRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,53 +35,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
         tempDisplaySettingManager = TempDisplaySettingManager(this)
 
-        //region Submit Button OnClick
-        binding.submitBtn.setOnClickListener {
-            val zipCode: String = binding.zipcodeET.text.toString()
-
-            if (zipCode.length != 5) {
-                Toast.makeText(this, "please enter valid zipCode", Toast.LENGTH_SHORT).show()
-            } else {
-                forecastRepository.loadForecastData(zipCode)
-            }
-        }
-        // endregion
-
-        // region RecyclerView Initialisation
-        val forecastList: RecyclerView = binding.recyclerView
-        forecastList.layoutManager = LinearLayoutManager(this)
-        val dailyForecastAdapter =
-            DailyForecastAdapter(tempDisplaySettingManager) { forecastItem ->
-
-                showForecastDetails(forecastItem)
-
-            }
-        forecastList.adapter = dailyForecastAdapter
-
-        //endregion
-
-        // region LiveData Observer
-        val weeklyForecastObserver = Observer<List<DailyForecast>> { forecastItem ->
-            //update our list adapter
-            dailyForecastAdapter.submitList(forecastItem)
-        }
-
-        forecastRepository.weeklyForecast.observe(this, weeklyForecastObserver)
-        //endregion
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.fragmentContainer,LocationEntryFragment())
+            .commit()
 
     }
-
-    // region Intent-> MainActivity-->ForecastDetailsActivity
-    private fun showForecastDetails(forecastItem: DailyForecast) {
-        val forecastDetailsActIntent = Intent(this, ForecastDetailsActivity::class.java)
-        forecastDetailsActIntent.putExtra("key_temp", forecastItem.temp)
-        forecastDetailsActIntent.putExtra("key_desc", forecastItem.description)
-        startActivity(forecastDetailsActIntent)
-    }
-    // endregion
-
-
-
 
     //region MENU
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -99,4 +61,16 @@ class MainActivity : AppCompatActivity() {
 
     }
     // endregion
+    override fun navigateToCurrentForecast(zipcode: String) {
+        //forecastRepository.loadForecastData(zipcode)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer,CurrentForecastFragment.newInstance(zipcode))
+            .commit()
+    }
+
+    override fun navigateToLocationEntry() {
+supportFragmentManager.beginTransaction()
+    .replace(R.id.fragmentContainer,LocationEntryFragment())
+    .commit()
+    }
 }

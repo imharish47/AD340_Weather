@@ -1,32 +1,26 @@
 package com.company47.ad340weather.view
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.company47.ad340weather.R
-import com.company47.ad340weather.`interface`.AppNavigator
-import com.company47.ad340weather.adapter.DailyForecastAdapter
 import com.company47.ad340weather.databinding.ActivityMainBinding
-import com.company47.ad340weather.location.CurrentForecastFragment
-import com.company47.ad340weather.location.LocationEntryFragment
-import com.company47.ad340weather.model_data.DailyForecast
-import com.company47.ad340weather.repository.ForecastRepository
 import com.company47.ad340weather.utils.TempDisplaySettingManager
 import com.company47.ad340weather.utils.disAlertDialog
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity(),AppNavigator {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var tempDisplaySettingManager: TempDisplaySettingManager;
     private lateinit var binding: ActivityMainBinding
-  //  private val forecastRepository = ForecastRepository()
+    //  private val forecastRepository = ForecastRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,11 +29,13 @@ class MainActivity : AppCompatActivity(),AppNavigator {
         setContentView(view)
         tempDisplaySettingManager = TempDisplaySettingManager(this)
 
-        supportFragmentManager
-            .beginTransaction()
-            .add(R.id.fragmentContainer,LocationEntryFragment())
-            .commit()
-
+        val navController = findNavController(R.id.nav_host_frag)
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        findViewById<Toolbar>(R.id.toolbar).setupWithNavController(
+            navController,
+            appBarConfiguration
+        )
+        findViewById<BottomNavigationView>(R.id.bottomNavView).setupWithNavController(navController)
     }
 
     //region MENU
@@ -61,16 +57,5 @@ class MainActivity : AppCompatActivity(),AppNavigator {
 
     }
     // endregion
-    override fun navigateToCurrentForecast(zipcode: String) {
-        //forecastRepository.loadForecastData(zipcode)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer,CurrentForecastFragment.newInstance(zipcode))
-            .commit()
-    }
 
-    override fun navigateToLocationEntry() {
-supportFragmentManager.beginTransaction()
-    .replace(R.id.fragmentContainer,LocationEntryFragment())
-    .commit()
-    }
 }

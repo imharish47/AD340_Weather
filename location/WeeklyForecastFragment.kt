@@ -17,7 +17,7 @@ import com.company47.ad340weather.utils.TempDisplaySettingManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
-class CurrentForecastFragment : Fragment() {
+class WeeklyForecastFragment : Fragment() {
     private lateinit var tempDisplaySettingManager: TempDisplaySettingManager;
     private val forecastRepository = ForecastRepository()
 
@@ -27,10 +27,11 @@ class CurrentForecastFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_current_forecast, container, false)
+
+
+        val view = inflater.inflate(R.layout.fragment_weekly_forecast, container, false)
         val zipCode = arguments?.getString(KEY_ZIP_CODE) ?: ""
         tempDisplaySettingManager = TempDisplaySettingManager(requireContext())
-
         //region Interface CurrentForecastFrag -> LocationEntryFrag
         val locationEntryBtn: FloatingActionButton = view.findViewById(R.id.floatingActionButton)
         locationEntryBtn.setOnClickListener {
@@ -70,26 +71,25 @@ class CurrentForecastFragment : Fragment() {
 
     private fun showLocationEntry() {
         val action =
-            CurrentForecastFragmentDirections.actionCurrentForecastFragmentToLocationEntryFragment()
+            WeeklyForecastFragmentDirections.actionWeeklyForecastFragmentToLocationEntryFragment()
         findNavController().navigate(action)
     }
 
     // region Intent-> CurrentForecastFrag-->ForecastDetailsActivity
     private fun showForecastDetails(forecastItem: DailyForecast) {
         val action =
-            CurrentForecastFragmentDirections.actionCurrentForecastFragmentToForecastDetailFragment(
+            WeeklyForecastFragmentDirections.actionWeeklyForecastFragmentToForecastDetailFragment(
                 forecastItem.temp, forecastItem.description
             )
         findNavController().navigate(action)
     }
     // endregion
 
-
     //region MainActivity To CurrentForecastFragment DATA passing through fragment->Args
     companion object {
         const val KEY_ZIP_CODE = "key_zipcode"
-        fun newInstance(zipCode: String): CurrentForecastFragment {
-            val fragment = CurrentForecastFragment()
+        fun newInstance(zipCode: String): WeeklyForecastFragment {
+            val fragment = WeeklyForecastFragment()
             val args = Bundle()
             args.putString(KEY_ZIP_CODE, zipCode)
             fragment.arguments = args

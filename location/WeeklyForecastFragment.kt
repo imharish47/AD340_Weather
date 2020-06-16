@@ -9,9 +9,12 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.company47.ad340weather.Location
+import com.company47.ad340weather.LocationRepository
 import com.company47.ad340weather.R
 import com.company47.ad340weather.adapter.DailyForecastAdapter
 import com.company47.ad340weather.model_data.DailyForecast
+import com.company47.ad340weather.model_data.WeeklyForecast
 import com.company47.ad340weather.repository.ForecastRepository
 import com.company47.ad340weather.utils.TempDisplaySettingManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -20,6 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class WeeklyForecastFragment : Fragment() {
     private lateinit var tempDisplaySettingManager: TempDisplaySettingManager;
     private val forecastRepository = ForecastRepository()
+    private lateinit var locationRepository: LocationRepository
 
 
     override fun onCreateView(
@@ -56,16 +60,24 @@ class WeeklyForecastFragment : Fragment() {
         //endregion
 
         // region LiveData Observer
-        val weeklyForecastObserver = Observer<List<DailyForecast>> { forecastItem ->
+        val weeklyForecastObserver = Observer<WeeklyForecast> { weaklyForecastItem ->
             //update our list adapter
-            dailyForecastAdapter.submitList(forecastItem)
+            dailyForecastAdapter.submitList(weaklyForecastItem.daily)
         }
 
-        forecastRepository.weeklyForecast.observe(requireActivity(), weeklyForecastObserver)
+        forecastRepository.weeklyForecast.observe(viewLifecycleOwner, weeklyForecastObserver)
         //endregion
 
-        //loading data from repository
-        forecastRepository.loadForecastData(zipCode)
+        locationRepository = LocationRepository(requireContext())
+
+        val savedLocationObserver = Observer<Location> { savedLocation ->
+            when (savedLocation) {
+                is Location.Zipcode -> forecastRepository.loadWeeklyForecast(savedLocation.zipcode)
+            }
+        }
+
+        locationRepository.savedLocation.observe(viewLifecycleOwner, savedLocationObserver)
+
         return view
     }
 
@@ -77,9 +89,14 @@ class WeeklyForecastFragment : Fragment() {
 
     // region Intent-> CurrentForecastFrag-->ForecastDetailsActivity
     private fun showForecastDetails(forecastItem: DailyForecast) {
+
+        val temp=forecastItem.temp.max
+        val description=forecastItem.weather[0].description
+        val date=forecastItem.date*1000
+        val forecastIcon=forecastItem.weather[0].icon
         val action =
             WeeklyForecastFragmentDirections.actionWeeklyForecastFragmentToForecastDetailFragment(
-                forecastItem.temp, forecastItem.description
+               temp,description,date,forecastIcon
             )
         findNavController().navigate(action)
     }

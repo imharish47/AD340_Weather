@@ -1,16 +1,24 @@
 package com.company47.ad340weather.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.api.load
 import com.company47.ad340weather.R
 import com.company47.ad340weather.model_data.DailyForecast
 import com.company47.ad340weather.utils.TempDisplaySettingManager
 import com.company47.ad340weather.utils.formatTempForDisplay
+import java.text.SimpleDateFormat
+import java.util.*
+
+@SuppressLint("SimpleDateFormat")
+private val DATE_FORMAT=SimpleDateFormat("MM-dd-yyyy")
 
 class DailyForecastAdapter(
     private val tempDisplaySettingManager: TempDisplaySettingManager,
@@ -64,13 +72,18 @@ class DailyForecastAdapter(
     ) : RecyclerView.ViewHolder(view) {
         private val tempText: TextView = view.findViewById(R.id.tempText)
         private val descriptionText: TextView = view.findViewById(R.id.descText)
+        private val dateText:TextView=view.findViewById(R.id.dateText)
+        private val forecastIcon:ImageView=view.findViewById(R.id.forecastIcon)
 
         fun bind(dailyForecast: DailyForecast) {
             tempText.text = formatTempForDisplay(
-                dailyForecast.temp,
+                dailyForecast.temp.max,
                 tempDisplaySettingManager.getTempDisplaySetting()
             )
-            descriptionText.text = dailyForecast.description
+            descriptionText.text = dailyForecast.weather[0].description
+            dateText.text= DATE_FORMAT.format(Date(dailyForecast.date*1000))
+            val iconId=dailyForecast.weather[0].icon
+            forecastIcon.load("http://openweathermap.org/img/wn/${iconId}@2x.png")
         }
 
     }

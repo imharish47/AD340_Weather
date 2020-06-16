@@ -20,7 +20,7 @@ class ForecastDetailsFragment : Fragment() {
 
     //this property only valid in onCreate and onDestroy
     private val binding: FragmentForecastDetailsBinding get() = _binding!!
-//
+
     private lateinit var tempDisplaySettingManager: TempDisplaySettingManager
     private val args: ForecastDetailsFragmentArgs by navArgs()
 
